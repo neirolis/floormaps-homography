@@ -2,7 +2,7 @@
 
 import sys
 
-
+from typing import Optional
 import numpy as np
 import cv2 as cv
 from cv2.typing import MatLike as cvMat
@@ -69,8 +69,8 @@ class HomographyReq(BaseModel):
   id: int
   fov_cam: list[list[float]]
   fov_map: list[list[float]]
-  items: list[dict]
-  bbox: list[float]
+  items: Optional[list[dict]]
+  bbox: Optional[list[float]]
 
 class HomographyResp(BaseModel):
   items: list[dict]   
@@ -93,11 +93,12 @@ async def HomographyHandler(req: HomographyReq):
     resp["points"] = H.getBBoxPosition(req.bbox)
 
   # calculate positon for the each item in request
-  for item in req.items:
-    if "data" not in item:
-      item["data"] = {}
-    item["data"]["points"] = H.getBBoxPosition(item["bbox"])
+  if req.items is not None and len(req.items) > 0:
+    for item in req.items:
+      if "data" not in item:
+        item["data"] = {}
+      item["data"]["points"] = H.getBBoxPosition(item["bbox"])
 
-    resp["items"].append(item)
+      resp["items"].append(item)
 
   return resp
