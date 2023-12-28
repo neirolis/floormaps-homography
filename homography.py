@@ -2,13 +2,14 @@
 
 import sys
 
-from typing import Optional
+
 import numpy as np
 import cv2 as cv
 from cv2.typing import MatLike as cvMat
 
 from fastapi import FastAPI
 from pydantic import BaseModel
+from typing import Optional
 
 
 class Homography:
@@ -68,9 +69,9 @@ class HomographyReq(BaseModel):
     id: int
     fov_cam: list[list[float]]
     fov_map: list[list[float]]
-    items: Optional[list[dict]]
-    bbox: Optional[list[float]]
-    points: Optional[list[list[float]]]
+    items: Optional[list[dict]] | None = None
+    bbox: Optional[list[float]] | None = None
+    points: Optional[list[list[float]]] | None = None
 
 
 class HomographyResp(BaseModel):
@@ -91,7 +92,7 @@ async def HomographyHandler(req: HomographyReq):
 
     # if request has bbox calculate it projection position
     if req.bbox is not None and len(req.bbox) == 4:
-        resp["points"].append(H.getBBoxPosition(req.bbox))
+        resp["points"] = H.getBBoxPosition(req.bbox)
 
     if req.points is not None:
         for p in req.points:
